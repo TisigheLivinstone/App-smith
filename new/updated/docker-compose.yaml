@@ -2,68 +2,83 @@ version: '3.8'
 
 services:
   mongodb:
-    image: docker.io/bitnami/mongodb:7.0
-    volumes:
-      - 'mongodb_data:/bitnami/mongodb'
+    image: bitnami/mongodb:latest
+    container_name: mongodb
     environment:
-      - MONGODB_ADVERTISED_HOSTNAME=${MONGODB_ADVERTISED_HOSTNAME}
       - MONGODB_USERNAME=${MONGODB_USERNAME}
       - MONGODB_DATABASE=${MONGODB_DATABASE}
       - MONGODB_PASSWORD=${MONGODB_PASSWORD}
       - MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/bitnami/mongodb
 
   redis:
-    image: docker.io/bitnami/redis:7.0
-    volumes:
-      - 'redis_data:/bitnami/redis'
+    image: bitnami/redis:latest
+    container_name: redis
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/bitnami/redis
 
   appsmith:
-    image: docker.io/bitnami/appsmith:1
-    environment:
-      - APPSMITH_MODE=client
-      - APPSMITH_API_HOST=${APPSMITH_API_HOST}
-      - APPSMITH_RTS_HOST=${APPSMITH_RTS_HOST}
+    image: bitnami/appsmith:latest
+    container_name: appsmith
     ports:
-      - 80:8080
-
-  appsmith-api:
-    image: docker.io/bitnami/appsmith:1
+      - "80:8080"
     environment:
-      - APPSMITH_MODE=backend
-      - BITNAMI_DEBUG=true
-      - APPSMITH_API_HOST=${APPSMITH_API_HOST}
+      - APPSMITH_API_HOST=appsmith-api
+      - APPSMITH_RTS_HOST=appsmith-rts
       - APPSMITH_DATABASE_HOST=${APPSMITH_DATABASE_HOST}
       - APPSMITH_DATABASE_PORT_NUMBER=${APPSMITH_DATABASE_PORT_NUMBER}
       - APPSMITH_DATABASE_USER=${APPSMITH_DATABASE_USER}
       - APPSMITH_DATABASE_NAME=${APPSMITH_DATABASE_NAME}
       - APPSMITH_DATABASE_PASSWORD=${APPSMITH_DATABASE_PASSWORD}
-      - APPSMITH_REDIS_PASSWORD=${REDIS_PASSWORD}
       - APPSMITH_ENCRYPTION_PASSWORD=${APPSMITH_ENCRYPTION_PASSWORD}
       - APPSMITH_ENCRYPTION_SALT=${APPSMITH_ENCRYPTION_SALT}
-      # Hack: This is only necessary in docker-compose
       - APPSMITH_DATABASE_INIT_DELAY=${APPSMITH_DATABASE_INIT_DELAY}
+      - APPSMITH_DATABASE_INIT_DELAY_RTS=${APPSMITH_DATABASE_INIT_DELAY_RTS}
+    depends_on:
+      - mongodb
+      - redis
     volumes:
-      - 'appsmith_backend_data:/bitnami/appsmith'
+      - appsmith_data:/bitnami/appsmith
 
-  appsmith-rts:
-    image: docker.io/bitnami/appsmith:1
+  appsmith-api:
+    image: bitnami/appsmith-api:latest
+    container_name: appsmith-api
     environment:
-      - APPSMITH_MODE=rts
-      - APPSMITH_API_HOST=${APPSMITH_API_HOST}
       - APPSMITH_DATABASE_HOST=${APPSMITH_DATABASE_HOST}
       - APPSMITH_DATABASE_PORT_NUMBER=${APPSMITH_DATABASE_PORT_NUMBER}
       - APPSMITH_DATABASE_USER=${APPSMITH_DATABASE_USER}
       - APPSMITH_DATABASE_NAME=${APPSMITH_DATABASE_NAME}
       - APPSMITH_DATABASE_PASSWORD=${APPSMITH_DATABASE_PASSWORD}
-      # Hack: This is only necessary in docker-compose
-      - APPSMITH_DATABASE_INIT_DELAY=${APPSMITH_DATABASE_INIT_DELAY_RTS}
+      - APPSMITH_ENCRYPTION_PASSWORD=${APPSMITH_ENCRYPTION_PASSWORD}
+      - APPSMITH_ENCRYPTION_SALT=${APPSMITH_ENCRYPTION_SALT}
+    depends_on:
+      - mongodb
+
+  appsmith-rts:
+    image: bitnami/appsmith-rts:latest
+    container_name: appsmith-rts
+    environment:
+      - APPSMITH_DATABASE_HOST=${APPSMITH_DATABASE_HOST}
+      - APPSMITH_DATABASE_PORT_NUMBER=${APPSMITH_DATABASE_PORT_NUMBER}
+      - APPSMITH_DATABASE_USER=${APPSMITH_DATABASE_USER}
+      - APPSMITH_DATABASE_NAME=${APPSMITH_DATABASE_NAME}
+      - APPSMITH_DATABASE_PASSWORD=${APPSMITH_DATABASE_PASSWORD}
+      - APPSMITH_ENCRYPTION_PASSWORD=${APPSMITH_ENCRYPTION_PASSWORD}
+      - APPSMITH_ENCRYPTION_SALT=${APPSMITH_ENCRYPTION_SALT}
+    depends_on:
+      - mongodb
 
 volumes:
   mongodb_data:
     driver: local
   redis_data:
     driver: local
-  appsmith_backend_data:
+  appsmith_data:
     driver: local
