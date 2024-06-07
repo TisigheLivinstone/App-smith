@@ -30,8 +30,8 @@ services:
     ports:
       - "80:8080"
     environment:
-      - APPSMITH_API_HOST=appsmith-api
-      - APPSMITH_RTS_HOST=appsmith-rts
+      - APPSMITH_API_HOST=${APPSMITH_API_HOST}
+      - APPSMITH_RTS_HOST=${APPSMITH_RTS_HOST}
       - APPSMITH_DATABASE_HOST=${APPSMITH_DATABASE_HOST}
       - APPSMITH_DATABASE_PORT_NUMBER=${APPSMITH_DATABASE_PORT_NUMBER}
       - APPSMITH_DATABASE_USER=${APPSMITH_DATABASE_USER}
@@ -47,34 +47,6 @@ services:
     volumes:
       - appsmith_data:/bitnami/appsmith
 
-  appsmith-api:
-    image: bitnami/appsmith-api:latest
-    container_name: appsmith-api
-    environment:
-      - APPSMITH_DATABASE_HOST=${APPSMITH_DATABASE_HOST}
-      - APPSMITH_DATABASE_PORT_NUMBER=${APPSMITH_DATABASE_PORT_NUMBER}
-      - APPSMITH_DATABASE_USER=${APPSMITH_DATABASE_USER}
-      - APPSMITH_DATABASE_NAME=${APPSMITH_DATABASE_NAME}
-      - APPSMITH_DATABASE_PASSWORD=${APPSMITH_DATABASE_PASSWORD}
-      - APPSMITH_ENCRYPTION_PASSWORD=${APPSMITH_ENCRYPTION_PASSWORD}
-      - APPSMITH_ENCRYPTION_SALT=${APPSMITH_ENCRYPTION_SALT}
-    depends_on:
-      - mongodb
-
-  appsmith-rts:
-    image: bitnami/appsmith-rts:latest
-    container_name: appsmith-rts
-    environment:
-      - APPSMITH_DATABASE_HOST=${APPSMITH_DATABASE_HOST}
-      - APPSMITH_DATABASE_PORT_NUMBER=${APPSMITH_DATABASE_PORT_NUMBER}
-      - APPSMITH_DATABASE_USER=${APPSMITH_DATABASE_USER}
-      - APPSMITH_DATABASE_NAME=${APPSMITH_DATABASE_NAME}
-      - APPSMITH_DATABASE_PASSWORD=${APPSMITH_DATABASE_PASSWORD}
-      - APPSMITH_ENCRYPTION_PASSWORD=${APPSMITH_ENCRYPTION_PASSWORD}
-      - APPSMITH_ENCRYPTION_SALT=${APPSMITH_ENCRYPTION_SALT}
-    depends_on:
-      - mongodb
-
 volumes:
   mongodb_data:
     driver: local
@@ -82,3 +54,7 @@ volumes:
     driver: local
   appsmith_data:
     driver: local
+
+networks:
+  default:
+    driver: bridge
