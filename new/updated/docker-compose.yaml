@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  appsmith:
+    image: docker.io/bitnami/appsmith:1
+    environment:
+      - APPSMITH_MODE=client
+      - APPSMITH_API_HOST=appsmith-api
+      - APPSMITH_RTS_HOST=appsmith-rts
+    ports:
+      - 8002:8080
+    networks:
+      - appsmith
+      - proxy
+
+  appsmith-api:
+    image: docker.io/bitnami/appsmith:1
+    environment:
+      - APPSMITH_MODE=backend
+      - BITNAMI_DEBUG=true
+      - APPSMITH_API_HOST=appsmith-api
+      - APPSMITH_DATABASE_HOST=mongodb
+      - APPSMITH_DATABASE_PORT_NUMBER=27017
+      - APPSMITH_DATABASE_USER=bn_appsmith
+      - APPSMITH_DATABASE_NAME=bitnami_appsmith
+      - APPSMITH_DATABASE_PASSWORD=bitnami123
+      - APPSMITH_REDIS_PASSWORD=bitnami123
+      - APPSMITH_ENCRYPTION_PASSWORD=test123
+      - APPSMITH_ENCRYPTION_SALT=testsalt123
+      - APPSMITH_DATABASE_INIT_DELAY=90
+    volumes:
+      - 'appsmith_backend_data:/bitnami/appsmith'
+    networks:
+      - appsmith
+      - proxy
+
+  appsmith-rts:
+    image: docker.io/bitnami/appsmith:1
+    environment:
+      - APPSMITH_MODE=rts
+      - APPSMITH_API_HOST=appsmith-api
+      - APPSMITH_DATABASE_PORT_NUMBER=27017
+      - APPSMITH_DATABASE_USER=bn_appsmith
+      - APPSMITH_DATABASE_NAME=bitnami_appsmith
+      - APPSMITH_DATABASE_PASSWORD=bitnami123
+      - APPSMITH_DATABASE_INIT_DELAY=60
+    networks:
+      - appsmith
+      - proxy
+
+networks:
+  appsmith:
+  proxy:
+    external: true
+
+volumes:
+  appsmith_backend_data:
+    driver: local
