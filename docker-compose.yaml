@@ -11,7 +11,9 @@ services:
     restart: unless-stopped
     networks:
       - appsmith_network
+      - proxy
 
 networks:
   appsmith_network:
-    driver: bridge
+  proxy:
+    external: true
